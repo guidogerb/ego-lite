@@ -70,6 +70,13 @@ export async function runMain(options: RunMainOptions = {}) {
     ...options.services,
   };
 
+  // The app-distributed command historically uses `ego-browser nodejs` while
+  // the open-source harness consumes stdin directly. Accept both spellings so
+  // Linux source builds remain compatible with the published agent skill.
+  if (argv[0] === "nodejs") {
+    argv.shift();
+  }
+
   if (argv[0] === "-h" || argv[0] === "--help") {
     write(stdout, HELP);
     return 0;

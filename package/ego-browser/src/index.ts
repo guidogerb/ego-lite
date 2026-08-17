@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 import * as helpers from "./helpers.js";
 import {
@@ -16,6 +17,7 @@ import {
 } from "./output-sink.js";
 import { runMain } from "./run.js";
 import { emitUpdateNotice, type VersionSource } from "./update-notice.js";
+import { ensureLinuxEgoRuntime } from "./linux-runtime.js";
 
 type HelperFunction = (...args: unknown[]) => unknown;
 type EgoRuntime = Record<string, unknown> & {
@@ -255,10 +257,13 @@ function isSyncFactoryHelper(path: string[]) {
 
 if (isDirectCli()) {
   try {
+    await ensureLinuxEgoRuntime();
     process.exitCode = await runMain();
   } catch (error) {
     console.error(error?.stack || error?.message || String(error));
     process.exitCode = 1;
+  } finally {
+    (globalThis as any).ego?.disconnect?.();
   }
 } else {
   installEgoSdk();
@@ -273,9 +278,12 @@ function createBufferedLog() {
 }
 
 function isDirectCli() {
-  return (
-    process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url
-  );
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return pathToFileURL(process.argv[1]).href === import.meta.url;
+  }
 }
 
 function wrapInvalidating(ego: EgoRuntime, methodNames: string[]) {

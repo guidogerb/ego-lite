@@ -32,6 +32,11 @@ console.log(await page.info())
 JS
 ```
 
+On Linux, the source build automatically starts or reconnects to a local
+Chromium-compatible browser over CDP when the native ego bridge is unavailable.
+Run `../../scripts/install-linux.sh`, then prepend `../../.local/bin` to `PATH`.
+Runtime profiles, logs, and task-space metadata stay under `.linux-runtime/`.
+
 Flags: `-h | --help`, `--doctor`, `--reload`, `--debug-clicks`.
 
 ## Skill workspace

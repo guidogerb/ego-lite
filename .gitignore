@@ -82,3 +82,5 @@ test/
 !package/ego-browser/test/*.test.js
 # Translated skill (local only)
 skills/ego-browser/SKILL.zh.md
+.local/
+.linux-runtime/
